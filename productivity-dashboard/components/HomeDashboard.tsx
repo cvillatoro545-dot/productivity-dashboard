@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import CalendarWidget from "./CalendarWidget";
 import { Check, Circle, Flame, Dumbbell, BookOpen, Zap, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { Task, Habit } from "@/lib/types";
@@ -296,6 +297,9 @@ export default function Home({ tasks, habits, streak, onTaskToggle, onHabitToggl
 
       {/* Weekly Snapshot */}
       {momentum && <WeeklySnapshot raw={momentum.raw} />}
+
+      {/* Calendar */}
+      <CalendarWidget />
     </div>
   );
 }

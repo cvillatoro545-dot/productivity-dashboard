@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Jost, DM_Mono } from "next/font/google";
 import "./globals.css";
+import SessionWrapper from "@/components/SessionWrapper";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -31,7 +32,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${cormorant.variable} ${jost.variable} ${dmMono.variable}`}>
-      <body className="font-body antialiased">{children}</body>
+      <body className="font-body antialiased">
+        <SessionWrapper>{children}</SessionWrapper>
+      </body>
     </html>
   );
 }
