@@ -146,3 +146,43 @@ export interface WeatherData {
   humidity: number;
   feelsLike: number;
 }
+
+export type BucketCategory = "Travel" | "Experience" | "Career" | "Personal" | "Health" | "Creative" | "Financial";
+
+export interface BucketItem {
+  id: number;
+  text: string;
+  category: BucketCategory;
+  completed: boolean;
+  completed_at?: string;
+  created_at: string;
+}
+
+export interface YearReflection {
+  id: number;
+  year: number;
+  vision?: string;
+  non_negotiables?: string;
+  focus?: string;
+  change?: string;
+  updated_at: string;
+}
+
+export interface YearBucket {
+  id: number;
+  year: number;
+  title: string;
+  description?: string;
+  color: string;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface YearGoal {
+  id: number;
+  year: number;
+  category: "Finance" | "Health" | "Business" | "Personal" | "Relationships" | "Growth";
+  text: string;
+  completed: boolean;
+  created_at: string;
+}

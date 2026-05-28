@@ -12,9 +12,13 @@ import ProductivityChart from "@/components/ProductivityChart";
 import BooksPanel from "@/components/BooksPanel";
 import WeekView from "@/components/WeekView";
 import QuarterView from "@/components/QuarterView";
+import BucketListPanel from "@/components/BucketListPanel";
+import YearView from "@/components/YearView";
 import Header from "@/components/Header";
 
-type Tab = "week" | "quarter" | "tasks" | "habits" | "notes" | "goals" | "journal" | "books";
+type Tab = "week" | "quarter" | "year" | "tasks" | "habits" | "notes" | "goals" | "journal" | "books" | "bucket";
+
+const OVERVIEW_TABS: Tab[] = ["week", "quarter", "year"];
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -58,27 +62,38 @@ export default function DashboardPage() {
   async function handleTaskToggle(id: number, done: boolean) {
     const status = done ? "done" : "todo";
     const res = await fetch(`/api/tasks/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
-    if (res.ok) {
-      setTasks((prev) => prev.map((t) => t.id === id ? { ...t, status } : t));
-      fetchAll();
-    }
+    if (res.ok) { setTasks((prev) => prev.map((t) => t.id === id ? { ...t, status } : t)); fetchAll(); }
   }
 
   const today = new Date();
 
-  const tabs: { id: Tab; label: string; badge?: string }[] = [
-    { id: "week", label: "Week" },
-    { id: "quarter", label: "Quarter" },
-    { id: "tasks", label: "Tasks", badge: stats ? String(stats.tasksTodo + stats.tasksInProgress) : undefined },
-    { id: "habits", label: "Habits", badge: stats ? `${stats.habitsCompletedToday}/${stats.habitsTotal}` : undefined },
-    { id: "notes", label: "Notes" },
-    { id: "goals", label: "Goals" },
-    { id: "journal", label: "Journal" },
-    { id: "books", label: "Books" },
+  // Tab groups for visual separation
+  const tabGroups = [
+    {
+      tabs: [
+        { id: "week" as Tab, label: "Week" },
+        { id: "quarter" as Tab, label: "Quarter" },
+        { id: "year" as Tab, label: "Year" },
+      ]
+    },
+    {
+      tabs: [
+        { id: "tasks" as Tab, label: "Tasks", badge: stats ? String(stats.tasksTodo + stats.tasksInProgress) : undefined },
+        { id: "habits" as Tab, label: "Habits", badge: stats ? `${stats.habitsCompletedToday}/${stats.habitsTotal}` : undefined },
+        { id: "notes" as Tab, label: "Notes" },
+        { id: "goals" as Tab, label: "Goals" },
+        { id: "journal" as Tab, label: "Journal" },
+      ]
+    },
+    {
+      tabs: [
+        { id: "books" as Tab, label: "Books" },
+        { id: "bucket" as Tab, label: "Bucket List" },
+      ]
+    },
   ];
 
   return (
@@ -95,38 +110,46 @@ export default function DashboardPage() {
           <StatsBar stats={stats} loading={loading} />
         </div>
 
-        {activeTab !== "week" && activeTab !== "quarter" && (
+        {!OVERVIEW_TABS.includes(activeTab) && (
           <div className="stagger-child animate-fade-up delay-250 mb-6">
             <ProductivityChart />
           </div>
         )}
 
+        {/* Tab Navigation — grouped */}
         <div className="stagger-child animate-fade-up delay-300 mb-6">
-          <nav className="flex items-center gap-1 p-1 rounded-xl overflow-x-auto" style={{ background: "var(--bg-muted)", width: "fit-content" }}>
-            {tabs.map((tab) => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 capitalize whitespace-nowrap flex items-center gap-1.5"
-                style={{ background: activeTab === tab.id ? "var(--ink)" : "transparent", color: activeTab === tab.id ? "var(--bg)" : "var(--ink)", opacity: activeTab === tab.id ? 1 : 0.55 }}>
-                {tab.label}
-                {tab.badge !== undefined && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: activeTab === tab.id ? "rgba(255,255,255,0.15)" : "var(--border)", color: "inherit" }}>
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
+          <nav className="flex items-center gap-2 flex-wrap">
+            {tabGroups.map((group, gi) => (
+              <div key={gi} className="flex items-center gap-1 p-1 rounded-xl" style={{ background: "var(--bg-muted)" }}>
+                {group.tabs.map((tab) => (
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-1.5"
+                    style={{ background: activeTab === tab.id ? "var(--ink)" : "transparent", color: activeTab === tab.id ? "var(--bg)" : "var(--ink)", opacity: activeTab === tab.id ? 1 : 0.55 }}>
+                    {tab.label}
+                    {tab.badge !== undefined && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full"
+                        style={{ background: activeTab === tab.id ? "rgba(255,255,255,0.15)" : "var(--border)", color: "inherit" }}>
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
             ))}
           </nav>
         </div>
 
         <div className="stagger-child animate-fade-up delay-400">
-          {activeTab === "week" && <WeekView tasks={tasks} habits={habits} onTaskToggle={handleTaskToggle} />}
+          {activeTab === "week"    && <WeekView tasks={tasks} habits={habits} onTaskToggle={handleTaskToggle} />}
           {activeTab === "quarter" && <QuarterView />}
-          {activeTab === "tasks" && <TasksPanel tasks={tasks} setTasks={setTasks} onUpdate={fetchAll} />}
-          {activeTab === "habits" && <HabitsPanel habits={habits} setHabits={setHabits} onUpdate={fetchAll} />}
-          {activeTab === "notes" && <NotesPanel notes={notes} setNotes={setNotes} onUpdate={fetchAll} />}
-          {activeTab === "goals" && <GoalsPanel onUpdate={fetchAll} />}
+          {activeTab === "year"    && <YearView />}
+          {activeTab === "tasks"   && <TasksPanel tasks={tasks} setTasks={setTasks} onUpdate={fetchAll} />}
+          {activeTab === "habits"  && <HabitsPanel habits={habits} setHabits={setHabits} onUpdate={fetchAll} />}
+          {activeTab === "notes"   && <NotesPanel notes={notes} setNotes={setNotes} onUpdate={fetchAll} />}
+          {activeTab === "goals"   && <GoalsPanel onUpdate={fetchAll} />}
           {activeTab === "journal" && <JournalPanel />}
-          {activeTab === "books" && <BooksPanel />}
+          {activeTab === "books"   && <BooksPanel />}
+          {activeTab === "bucket"  && <BucketListPanel />}
         </div>
       </div>
     </div>
