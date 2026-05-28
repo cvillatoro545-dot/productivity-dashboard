@@ -104,6 +104,20 @@ export async function initializeDatabase() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS books (
+      id SERIAL PRIMARY KEY,
+      ol_key TEXT UNIQUE NOT NULL,
+      title TEXT NOT NULL,
+      author TEXT,
+      cover_url TEXT,
+      year INTEGER,
+      status TEXT CHECK (status IN ('want_to_read', 'reading', 'read', 'dnf')) DEFAULT 'want_to_read',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
   // Add sort_order column if it doesn't exist (for existing deployments)
   await sql`
     ALTER TABLE tasks ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0

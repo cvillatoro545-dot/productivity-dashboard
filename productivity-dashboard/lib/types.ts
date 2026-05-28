@@ -89,6 +89,18 @@ export interface DashboardStats {
   taskCompletionRate: number;
 }
 
+export interface Book {
+  id: number;
+  ol_key: string;
+  title: string;
+  author?: string;
+  cover_url?: string;
+  year?: number;
+  status: "want_to_read" | "reading" | "read" | "dnf";
+  created_at: string;
+  updated_at: string;
+}
+
 export interface WeatherData {
   temp: number;
   condition: string;

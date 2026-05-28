@@ -9,9 +9,10 @@ import NotesPanel from "@/components/NotesPanel";
 import GoalsPanel from "@/components/GoalsPanel";
 import JournalPanel from "@/components/JournalPanel";
 import ProductivityChart from "@/components/ProductivityChart";
+import BooksPanel from "@/components/BooksPanel";
 import Header from "@/components/Header";
 
-type Tab = "tasks" | "habits" | "notes" | "goals" | "journal";
+type Tab = "tasks" | "habits" | "notes" | "goals" | "journal" | "books";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -60,6 +61,7 @@ export default function DashboardPage() {
     { id: "notes", label: "Notes" },
     { id: "goals", label: "Goals" },
     { id: "journal", label: "Journal" },
+    { id: "books", label: "Books" },
   ];
 
   return (
@@ -102,6 +104,7 @@ export default function DashboardPage() {
           {activeTab === "notes" && <NotesPanel notes={notes} setNotes={setNotes} onUpdate={fetchAll} />}
           {activeTab === "goals" && <GoalsPanel onUpdate={fetchAll} />}
           {activeTab === "journal" && <JournalPanel />}
+          {activeTab === "books" && <BooksPanel />}
         </div>
       </div>
     </div>
