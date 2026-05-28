@@ -14,6 +14,7 @@ export async function initializeDatabase() {
       description TEXT,
       priority TEXT CHECK (priority IN ('low', 'medium', 'high')) DEFAULT 'medium',
       status TEXT CHECK (status IN ('todo', 'in_progress', 'done')) DEFAULT 'todo',
+      sort_order INTEGER DEFAULT 0,
       due_date DATE,
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -51,5 +52,60 @@ export async function initializeDatabase() {
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS goals (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      category TEXT CHECK (category IN ('financial', 'fitness', 'other')) DEFAULT 'other',
+      goal_type TEXT CHECK (goal_type IN ('roth_ira', 'emergency_fund', 'gym', 'custom')) DEFAULT 'custom',
+      target_amount NUMERIC,
+      current_amount NUMERIC DEFAULT 0,
+      monthly_target NUMERIC,
+      target_date DATE,
+      color TEXT DEFAULT '#D4A853',
+      notes TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS goal_logs (
+      id SERIAL PRIMARY KEY,
+      goal_id INTEGER REFERENCES goals(id) ON DELETE CASCADE,
+      amount NUMERIC,
+      log_date DATE NOT NULL DEFAULT CURRENT_DATE,
+      note TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS gym_logs (
+      id SERIAL PRIMARY KEY,
+      workout_date DATE NOT NULL UNIQUE,
+      notes TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS journal_entries (
+      id SERIAL PRIMARY KEY,
+      entry_date DATE NOT NULL UNIQUE DEFAULT CURRENT_DATE,
+      mood INTEGER CHECK (mood BETWEEN 1 AND 5),
+      content TEXT,
+      gratitude TEXT,
+      intentions TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  // Add sort_order column if it doesn't exist (for existing deployments)
+  await sql`
+    ALTER TABLE tasks ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0
   `;
 }
