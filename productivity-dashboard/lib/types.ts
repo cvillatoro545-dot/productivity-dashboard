@@ -19,10 +19,13 @@ export interface Habit {
   description?: string;
   color: string;
   icon: string;
+  category: "daily" | "devotional";
+  weekly_goal: number;
   created_at: string;
   streak?: number;
   completedToday?: boolean;
   completionRate?: number;
+  weekLogs?: string[];
 }
 
 export interface Note {
@@ -78,17 +81,6 @@ export interface JournalEntry {
   updated_at: string;
 }
 
-export interface DashboardStats {
-  tasksTotal: number;
-  tasksDone: number;
-  tasksInProgress: number;
-  tasksTodo: number;
-  habitsTotal: number;
-  habitsCompletedToday: number;
-  notesTotal: number;
-  taskCompletionRate: number;
-}
-
 export interface Book {
   id: number;
   ol_key: string;
@@ -99,6 +91,51 @@ export interface Book {
   status: "want_to_read" | "reading" | "read" | "dnf";
   created_at: string;
   updated_at: string;
+}
+
+export interface CreditCard {
+  id: number;
+  name: string;
+  balance: number;
+  original_balance: number;
+  credit_limit: number;
+  color: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuarterlyGoal {
+  id: number;
+  quarter_key: string;
+  category: "Finance" | "Health" | "Business" | "Personal";
+  text: string;
+  completed: boolean;
+  created_at: string;
+}
+
+export interface Achievement {
+  id: number;
+  quarter_key: string;
+  text: string;
+  created_at: string;
+}
+
+export interface ParkingLotItem {
+  id: number;
+  text: string;
+  done: boolean;
+  created_at: string;
+}
+
+export interface DashboardStats {
+  tasksTotal: number;
+  tasksDone: number;
+  tasksInProgress: number;
+  tasksTodo: number;
+  habitsTotal: number;
+  habitsCompletedToday: number;
+  notesTotal: number;
+  taskCompletionRate: number;
 }
 
 export interface WeatherData {

@@ -11,9 +11,10 @@ import JournalPanel from "@/components/JournalPanel";
 import ProductivityChart from "@/components/ProductivityChart";
 import BooksPanel from "@/components/BooksPanel";
 import WeekView from "@/components/WeekView";
+import QuarterView from "@/components/QuarterView";
 import Header from "@/components/Header";
 
-type Tab = "week" | "tasks" | "habits" | "notes" | "goals" | "journal" | "books";
+type Tab = "week" | "quarter" | "tasks" | "habits" | "notes" | "goals" | "journal" | "books";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -71,6 +72,7 @@ export default function DashboardPage() {
 
   const tabs: { id: Tab; label: string; badge?: string }[] = [
     { id: "week", label: "Week" },
+    { id: "quarter", label: "Quarter" },
     { id: "tasks", label: "Tasks", badge: stats ? String(stats.tasksTodo + stats.tasksInProgress) : undefined },
     { id: "habits", label: "Habits", badge: stats ? `${stats.habitsCompletedToday}/${stats.habitsTotal}` : undefined },
     { id: "notes", label: "Notes" },
@@ -93,7 +95,7 @@ export default function DashboardPage() {
           <StatsBar stats={stats} loading={loading} />
         </div>
 
-        {activeTab !== "week" && (
+        {activeTab !== "week" && activeTab !== "quarter" && (
           <div className="stagger-child animate-fade-up delay-250 mb-6">
             <ProductivityChart />
           </div>
@@ -118,6 +120,7 @@ export default function DashboardPage() {
 
         <div className="stagger-child animate-fade-up delay-400">
           {activeTab === "week" && <WeekView tasks={tasks} habits={habits} onTaskToggle={handleTaskToggle} />}
+          {activeTab === "quarter" && <QuarterView />}
           {activeTab === "tasks" && <TasksPanel tasks={tasks} setTasks={setTasks} onUpdate={fetchAll} />}
           {activeTab === "habits" && <HabitsPanel habits={habits} setHabits={setHabits} onUpdate={fetchAll} />}
           {activeTab === "notes" && <NotesPanel notes={notes} setNotes={setNotes} onUpdate={fetchAll} />}

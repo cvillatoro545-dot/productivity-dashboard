@@ -123,3 +123,56 @@ export async function initializeDatabase() {
     ALTER TABLE tasks ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0
   `;
 }
+
+export async function initializeQuarterTables() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS quarterly_goals (
+      id SERIAL PRIMARY KEY,
+      quarter_key TEXT NOT NULL,
+      category TEXT CHECK (category IN ('Finance', 'Health', 'Business', 'Personal')) DEFAULT 'Personal',
+      text TEXT NOT NULL,
+      completed BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS credit_cards (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      balance NUMERIC DEFAULT 0,
+      original_balance NUMERIC DEFAULT 0,
+      credit_limit NUMERIC DEFAULT 0,
+      color TEXT DEFAULT '#D4A853',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS achievements (
+      id SERIAL PRIMARY KEY,
+      quarter_key TEXT NOT NULL,
+      text TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS parking_lot (
+      id SERIAL PRIMARY KEY,
+      text TEXT NOT NULL,
+      done BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    ALTER TABLE habits ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'daily'
+  `;
+
+  await sql`
+    ALTER TABLE habits ADD COLUMN IF NOT EXISTS weekly_goal INTEGER DEFAULT 7
+  `;
+}
