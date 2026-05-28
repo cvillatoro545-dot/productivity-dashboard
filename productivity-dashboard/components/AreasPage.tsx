@@ -26,6 +26,7 @@ interface Project {
 
 function GoalHierarchy({ area }: { area: string }) {
   const [data, setData] = useState<{ goals: Goal[]; projects: Project[] }>({ goals: [], projects: [] });
+  const [loadingGoals, setLoadingGoals] = useState(true);
   const [expanded, setExpanded] = useState<number[]>([]);
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [showAddProject, setShowAddProject] = useState<number | null>(null);
@@ -35,9 +36,9 @@ function GoalHierarchy({ area }: { area: string }) {
 
   useEffect(() => {
     fetch(`/api/goals_v2?area=${area}&year=${currentYear}`)
-      .then((r) => r.ok && r.json())
-      .then(setData)
-      .catch(() => {});
+      .then((r) => r.ok ? r.json() : { goals: [], projects: [] })
+      .then((d) => setData({ goals: d?.goals || [], projects: d?.projects || [] }))
+      .catch(() => setData({ goals: [], projects: [] }));
   }, [area]);
 
   async function addGoal() {
