@@ -107,7 +107,7 @@ function HabitGrid({ habits, onToggle }: { habits: Habit[]; onToggle: (id: numbe
                     <button key={dateStr} onClick={() => !isFuture && onToggle(habit.id, dateStr)}
                       disabled={isFuture}
                       className={`flex-1 h-8 rounded-md transition-all ${isFuture ? "opacity-20 cursor-default" : "hover:scale-105 active:scale-95"} ${isToday && !done ? "ring-1" : ""}`}
-                      style={{ background: done ? habit.color : "var(--bg-muted)", ringColor: habit.color }}
+                      style={{ background: done ? habit.color : "var(--bg-muted)", outline: isToday && !done ? `1px solid ${habit.color}` : undefined }}
                       title={format(day, "EEE MMM d")}>
                       {done && <Check size={10} className="mx-auto text-white" strokeWidth={3} />}
                     </button>
