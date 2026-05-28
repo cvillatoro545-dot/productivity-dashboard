@@ -18,7 +18,7 @@ export default function NotesPanel({ notes, setNotes, onUpdate }: NotesPanelProp
   const [submitting, setSubmitting] = useState(false);
   const [searchTag, setSearchTag] = useState("");
 
-  const allTags = [...new Set(notes.flatMap((n) => n.tags))].slice(0, 12);
+  const allTags = Array.from(new Set(notes.flatMap((n) => n.tags))).slice(0, 12);
   const filtered = searchTag
     ? notes.filter((n) => n.tags.includes(searchTag))
     : notes;
