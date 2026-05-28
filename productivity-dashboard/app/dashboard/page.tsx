@@ -10,9 +10,10 @@ import GoalsPanel from "@/components/GoalsPanel";
 import JournalPanel from "@/components/JournalPanel";
 import ProductivityChart from "@/components/ProductivityChart";
 import BooksPanel from "@/components/BooksPanel";
+import WeekView from "@/components/WeekView";
 import Header from "@/components/Header";
 
-type Tab = "tasks" | "habits" | "notes" | "goals" | "journal" | "books";
+type Tab = "week" | "tasks" | "habits" | "notes" | "goals" | "journal" | "books";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -20,7 +21,7 @@ export default function DashboardPage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<Tab>("tasks");
+  const [activeTab, setActiveTab] = useState<Tab>("week");
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
@@ -53,9 +54,23 @@ export default function DashboardPage() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  async function handleTaskToggle(id: number, done: boolean) {
+    const status = done ? "done" : "todo";
+    const res = await fetch(`/api/tasks/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    if (res.ok) {
+      setTasks((prev) => prev.map((t) => t.id === id ? { ...t, status } : t));
+      fetchAll();
+    }
+  }
+
   const today = new Date();
 
   const tabs: { id: Tab; label: string; badge?: string }[] = [
+    { id: "week", label: "Week" },
     { id: "tasks", label: "Tasks", badge: stats ? String(stats.tasksTodo + stats.tasksInProgress) : undefined },
     { id: "habits", label: "Habits", badge: stats ? `${stats.habitsCompletedToday}/${stats.habitsTotal}` : undefined },
     { id: "notes", label: "Notes" },
@@ -78,14 +93,17 @@ export default function DashboardPage() {
           <StatsBar stats={stats} loading={loading} />
         </div>
 
-        <div className="stagger-child animate-fade-up delay-250 mb-6">
-          <ProductivityChart />
-        </div>
+        {activeTab !== "week" && (
+          <div className="stagger-child animate-fade-up delay-250 mb-6">
+            <ProductivityChart />
+          </div>
+        )}
 
         <div className="stagger-child animate-fade-up delay-300 mb-6">
-          <nav className="flex items-center gap-1 p-1 rounded-xl w-fit overflow-x-auto" style={{ background: "var(--bg-muted)" }}>
+          <nav className="flex items-center gap-1 p-1 rounded-xl overflow-x-auto" style={{ background: "var(--bg-muted)", width: "fit-content" }}>
             {tabs.map((tab) => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 capitalize whitespace-nowrap flex items-center gap-1.5"
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 capitalize whitespace-nowrap flex items-center gap-1.5"
                 style={{ background: activeTab === tab.id ? "var(--ink)" : "transparent", color: activeTab === tab.id ? "var(--bg)" : "var(--ink)", opacity: activeTab === tab.id ? 1 : 0.55 }}>
                 {tab.label}
                 {tab.badge !== undefined && (
@@ -99,6 +117,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="stagger-child animate-fade-up delay-400">
+          {activeTab === "week" && <WeekView tasks={tasks} habits={habits} onTaskToggle={handleTaskToggle} />}
           {activeTab === "tasks" && <TasksPanel tasks={tasks} setTasks={setTasks} onUpdate={fetchAll} />}
           {activeTab === "habits" && <HabitsPanel habits={habits} setHabits={setHabits} onUpdate={fetchAll} />}
           {activeTab === "notes" && <NotesPanel notes={notes} setNotes={setNotes} onUpdate={fetchAll} />}
