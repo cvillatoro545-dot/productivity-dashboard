@@ -176,3 +176,92 @@ export async function initializeQuarterTables() {
     ALTER TABLE habits ADD COLUMN IF NOT EXISTS weekly_goal INTEGER DEFAULT 7
   `;
 }
+
+export async function initializeAreasDB() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS goals_v2 (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      area TEXT NOT NULL,
+      year INTEGER NOT NULL DEFAULT EXTRACT(YEAR FROM NOW())::integer,
+      quarter TEXT,
+      status TEXT DEFAULT 'active',
+      description TEXT,
+      target_date DATE,
+      color TEXT DEFAULT '#D4A853',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS projects (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      goal_id INTEGER REFERENCES goals_v2(id) ON DELETE SET NULL,
+      area TEXT,
+      status TEXT DEFAULT 'active',
+      description TEXT,
+      target_date DATE,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`ALTER TABLE tasks ADD COLUMN IF NOT EXISTS project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS finance_accounts (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      account_type TEXT NOT NULL,
+      subtype TEXT,
+      balance NUMERIC DEFAULT 0,
+      target NUMERIC,
+      monthly_contribution NUMERIC DEFAULT 0,
+      color TEXT DEFAULT '#D4A853',
+      institution TEXT,
+      is_debt BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS finance_snapshots (
+      id SERIAL PRIMARY KEY,
+      account_id INTEGER REFERENCES finance_accounts(id) ON DELETE CASCADE,
+      balance NUMERIC NOT NULL,
+      snapshot_date DATE DEFAULT CURRENT_DATE,
+      note TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS budget_categories (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      budgeted NUMERIC DEFAULT 0,
+      spent NUMERIC DEFAULT 0,
+      month TEXT NOT NULL,
+      color TEXT DEFAULT '#7A9E7E',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    INSERT INTO finance_accounts (name, account_type, subtype, balance, target, monthly_contribution, color)
+    SELECT
+      title,
+      CASE WHEN goal_type = 'roth_ira' THEN 'investment' ELSE 'savings' END,
+      goal_type,
+      current_amount,
+      target_amount,
+      COALESCE(monthly_target, 0),
+      color
+    FROM goals
+    WHERE goal_type IN ('roth_ira', 'emergency_fund')
+    ON CONFLICT DO NOTHING
+  `;
+}
