@@ -347,7 +347,7 @@ export default function YearView() {
 
   async function addBucket(data: { title: string; description: string; color: string }) {
     const res = await fetch("/api/year", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "bucket", year, ...data }) });
-    if (res.ok) setBuckets((prev) => [...prev, await res.json()]);
+    if (res.ok) { const item = await res.json(); setBuckets((prev) => [...prev, item]); }
   }
 
   async function updateBucket(id: number, data: Partial<YearBucket>) {
@@ -362,7 +362,7 @@ export default function YearView() {
 
   async function addGoal(category: YearGoalCategory, text: string) {
     const res = await fetch("/api/year", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "goal", year, category, text }) });
-    if (res.ok) setGoals((prev) => [...prev, await res.json()]);
+    if (res.ok) { const item = await res.json(); setGoals((prev) => [...prev, item]); }
   }
 
   async function toggleGoal(id: number, completed: boolean) {
